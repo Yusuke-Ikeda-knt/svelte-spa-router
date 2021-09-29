@@ -6,7 +6,7 @@ import {wrap as _wrap} from './wrap'
 /**
  * Wraps a component to add route pre-conditions.
  * @deprecated Use `wrap` from `svelte-spa-router/wrap` instead. This function will be removed in a later version.
- * 
+ *
  * @param {SvelteComponent} component - Svelte component for the route
  * @param {object} [userData] - Optional object that will be passed to each `conditionsFailed` event
  * @param {...function(RouteDetail): boolean} conditions - Route pre-conditions to add, which will be executed in order
@@ -90,7 +90,7 @@ export const querystring = derived(
  * Despite this being writable, consumers should not change the value of the store.
  * It is exported as a readable store only (in the typings file)
  */
-export const params = writable(undefined)
+export const params = writable(null)
 
 /**
  * Navigates to a new page programmatically.
@@ -107,13 +107,13 @@ export async function push(location) {
     await tick()
 
     // Note: this will include scroll state in history even when restoreScrollState is false
-    history.replaceState({...history.state, __svelte_spa_router_scrollX: window.scrollX, __svelte_spa_router_scrollY: window.scrollY}, undefined)      
+    history.replaceState({...history.state, __svelte_spa_router_scrollX: window.scrollX, __svelte_spa_router_scrollY: window.scrollY}, '', null)
     window.location.hash = (location.charAt(0) == '#' ? '' : '#') + location
 }
 
 /**
  * Navigates back in history (equivalent to pressing the browser's back button).
- * 
+ *
  * @return {Promise<void>} Promise that resolves after the page navigation has completed
  */
 export async function pop() {
@@ -144,7 +144,7 @@ export async function replace(location) {
         }
         delete newState['__svelte_spa_router_scrollX']
         delete newState['__svelte_spa_router_scrollY']
-        window.history.replaceState(newState, undefined, dest)
+        window.history.replaceState(newState, '', dest)
     }
     catch (e) {
         // eslint-disable-next-line no-console
@@ -235,7 +235,7 @@ function linkOpts(val) {
  */
 function scrollstateHistoryHandler(href) {
     // Setting the url (3rd arg) to href will break clicking for reasons, so don't try to do that
-    history.replaceState({...history.state, __svelte_spa_router_scrollX: window.scrollX, __svelte_spa_router_scrollY: window.scrollY}, undefined)
+    history.replaceState({...history.state, __svelte_spa_router_scrollX: window.scrollX, __svelte_spa_router_scrollY: window.scrollY}, null, null)
     // This will force an update as desired, but this time our scroll state will be attached
     window.location.hash = href
 }
@@ -304,7 +304,7 @@ class RouteItem {
         }
 
         // Path must be a regular or expression, or a string starting with '/' or '*'
-        if (!path || 
+        if (!path ||
             (typeof path == 'string' && (path.length < 1 || (path.charAt(0) != '/' && path.charAt(0) != '*'))) ||
             (typeof path == 'object' && !(path instanceof RegExp))
         ) {
@@ -403,7 +403,7 @@ class RouteItem {
 
     /**
      * Executes all conditions (if any) to control whether the route can be shown. Conditions are executed in the order they are defined, and if a condition fails, the following ones aren't executed.
-     * 
+     *
      * @param {RouteDetail} detail - Route detail
      * @returns {boolean} Returns true if all the conditions succeeded
      */
@@ -588,7 +588,7 @@ const unsubscribeLoc = loc.subscribe(async (newLoc) => {
     // If we're still here, there was no match, so show the empty component
     component = null
     componentObj = null
-    params.set(undefined)
+    params.set(null)
 })
 
 onDestroy(() => {
